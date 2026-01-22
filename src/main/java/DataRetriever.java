@@ -11,7 +11,7 @@ public class DataRetriever {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
                             select dish.id as dish_id, dish.name as dish_name, dish_type, dish.selling_price as dish_price
-                            from dish
+                            from dish join dishingredient on  dish.id = ingredient.id
                             where dish.id = ?;
                             """);
             preparedStatement.setInt(1, id);
@@ -21,7 +21,7 @@ public class DataRetriever {
                 dish.setId(resultSet.getInt("dish_id"));
                 dish.setName(resultSet.getString("dish_name"));
                 dish.setDishType(DishTypeEnum.valueOf(resultSet.getString("dish_type")));
-                dish.setSellingPrice(resultSet.getObject("dish_price") == null
+                dish.setPrice(resultSet.getObject("dish_price") == null
                         ? null : resultSet.getDouble("dish_price"));
                 dish.setIngredients(findIngredientByDishId(id));
                 return dish;

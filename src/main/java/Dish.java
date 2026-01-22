@@ -1,33 +1,27 @@
 import java.util.List;
 import java.util.Objects;
 
+import static javax.swing.UIManager.get;
+
 public class Dish {
     private Integer id;
-    private Double sellingPrice;
+    private Double price;
     private String name;
     private DishTypeEnum dishType;
-    private List<Ingredient> ingredients;
+    private List<DishIngredient> ingredients;
 
-    public Double getSellingPrice() {
-        return sellingPrice;
+    public Dish(Double price) {
+        this.price = price;
     }
 
-    public void setSellingPrice(Double sellingPrice) {
-        this.sellingPrice = sellingPrice;
+    public Double getPrice() {
+        return price;
     }
 
-
-    public Double getDishCost() {
-        double totalPrice = 0;
-        for (int i = 0; i < ingredients.size(); i++) {
-            Double quantity = ingredients.get(i).getQuantity();
-            if(quantity == null) {
-                throw new RuntimeException("...");
-            }
-            totalPrice = totalPrice + ingredients.get(i).getPrice() * quantity;
-        }
-        return totalPrice;
+    public void setPrice(Double price) {
+        this.price = price;
     }
+
 
     public Dish() {
     }
@@ -64,7 +58,7 @@ public class Dish {
         this.dishType = dishType;
     }
 
-    public List<Ingredient> getIngredients() {
+    public List<DisIngredient> getIngredients() {
         return ingredients;
     }
 
@@ -95,7 +89,7 @@ public class Dish {
     public String toString() {
         return "Dish{" +
                 "id=" + id +
-                ", sellingPrice=" + sellingPrice +
+                ", sellingPrice=" + price +
                 ", name='" + name + '\'' +
                 ", dishType=" + dishType +
                 ", ingredients=" + ingredients +
@@ -103,9 +97,9 @@ public class Dish {
     }
 
     public Double getGrossMargin() {
-        if (sellingPrice == null) {
+        if (price == null) {
             throw new RuntimeException("Selling price not available for dish: " + name);
         }
-        return sellingPrice - getDishCost();
+        return price - getDishCost();
     }
 }

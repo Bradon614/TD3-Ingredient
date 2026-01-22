@@ -1,16 +1,15 @@
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class DishIngredient {
     private int id;
-    private int dishId;
-    private int ingredientId;
+    private Dish dishId;
+    private List<Ingredient> ingredientId;
     private double quantityRequired;
     private UnitTypeEnum unit;
 
-    public DishIngredient() {
-    }
-
-    public DishIngredient(int id, int dishId, int ingredientId, double quantityRequired, UnitTypeEnum unit) {
+    public DishIngredient(int id, Dish dishId, List<Ingredient> ingredientId, double quantityRequired, UnitTypeEnum unit) {
         this.id = id;
         this.dishId = dishId;
         this.ingredientId = ingredientId;
@@ -26,19 +25,19 @@ public class DishIngredient {
         this.id = id;
     }
 
-    public int getDishId() {
+    public Dish getDishId() {
         return dishId;
     }
 
-    public void setDishId(int dishId) {
+    public void setDishId(Dish dishId) {
         this.dishId = dishId;
     }
 
-    public int getIngredientId() {
+    public List<Ingredient> getIngredientId() {
         return ingredientId;
     }
 
-    public void setIngredientId(int ingredientId) {
+    public void setIngredientId(List<Ingredient> ingredientId) {
         this.ingredientId = ingredientId;
     }
 
@@ -58,7 +57,6 @@ public class DishIngredient {
         this.unit = unit;
     }
 
-
     @Override
     public String toString() {
         return "DishIngredient{" +
@@ -68,18 +66,5 @@ public class DishIngredient {
                 ", quantityRequired=" + quantityRequired +
                 ", unit=" + unit +
                 '}';
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        DishIngredient that = (DishIngredient) o;
-        return id == that.id && dishId == that.dishId && ingredientId == that.ingredientId && Double.compare(quantityRequired, that.quantityRequired) == 0 && unit == that.unit;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, dishId, ingredientId, quantityRequired, unit);
     }
 }
