@@ -1,70 +1,52 @@
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+
 
 public class DishIngredient {
-    private int id;
-    private Dish dishId;
-    private List<Ingredient> ingredientId;
-    private double quantityRequired;
-    private UnitTypeEnum unit;
+    private Dish dish;
+    private Ingredient ingredient;
+    private Double quantity;
+    private Unit unit;
 
-    public DishIngredient(int id, Dish dishId, List<Ingredient> ingredientId, double quantityRequired, UnitTypeEnum unit) {
-        this.id = id;
-        this.dishId = dishId;
-        this.ingredientId = ingredientId;
-        this.quantityRequired = quantityRequired;
-        this.unit = unit;
+    public Ingredient getIngredient() {
+        return ingredient;
     }
 
-    public int getId() {
-        return id;
+    public void setIngredient(Ingredient ingredient) {
+        this.ingredient = ingredient;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public Double getQuantity() {
+        return quantity;
     }
 
-    public Dish getDishId() {
-        return dishId;
+    public void setQuantity(Double quantity) {
+        this.quantity = quantity;
     }
 
-    public void setDishId(Dish dishId) {
-        this.dishId = dishId;
-    }
-
-    public List<Ingredient> getIngredientId() {
-        return ingredientId;
-    }
-
-    public void setIngredientId(List<Ingredient> ingredientId) {
-        this.ingredientId = ingredientId;
-    }
-
-    public double getQuantityRequired() {
-        return quantityRequired;
-    }
-
-    public void setQuantityRequired(double quantityRequired) {
-        this.quantityRequired = quantityRequired;
-    }
-
-    public UnitTypeEnum getUnit() {
+    public Unit getUnit() {
         return unit;
     }
 
-    public void setUnit(UnitTypeEnum unit) {
+    public void setUnit(Unit unit) {
         this.unit = unit;
+    }
+
+    public Dish getDish() {
+        return dish;
+    }
+
+    public void setDish(Dish dish) {
+        this.dish = dish;
     }
 
     @Override
     public String toString() {
         return "DishIngredient{" +
-                "id=" + id +
-                ", dishId=" + dishId +
-                ", ingredientId=" + ingredientId +
-                ", quantityRequired=" + quantityRequired +
+                "ingredient=" + ingredient +
+                ", quantity=" + quantity +
                 ", unit=" + unit +
                 '}';
+    }
+
+    public int getQuantity_required() {
     }
 }
