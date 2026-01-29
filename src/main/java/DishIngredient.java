@@ -47,6 +47,5 @@ public class DishIngredient {
                 '}';
     }
 
-    public int getQuantity_required() {
-    }
+
 }

@@ -10,7 +10,8 @@ public class DataRetriever {
         DBConnection dbConnection = new DBConnection();
         try (Connection connection = dbConnection.getConnection()) {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    select id, reference, creation_datetime from "order" where reference like ?""");
+                select id, reference, creation_datetime, order_type, status 
+                from "order" where reference = ?""");
             preparedStatement.setString(1, reference);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -19,6 +20,10 @@ public class DataRetriever {
                 order.setId(idOrder);
                 order.setReference(resultSet.getString("reference"));
                 order.setCreationDatetime(resultSet.getTimestamp("creation_datetime").toInstant());
+
+
+                String orderTypeStr = resultSet.getString("order_type");
+                String statusStr = resultSet.getString("status");
                 order.setDishOrderList(findDishOrderByIdOrder(idOrder));
                 return order;
             }
@@ -83,83 +88,65 @@ public class DataRetriever {
         }
     }
 
+    Order saveOrder(Order orderToSave) {
+        if (orderToSave == null) {
+            throw new RuntimeException("Order is null");
+        }
+        if (orderToSave.getTypeOrder() == null) {
+            throw new RuntimeException("Order type is null");
+        }
+        if (orderToSave.getStatus() == null) {
+            throw new RuntimeException("Order status is null");
+        }
 
+        DBConnection dbConnection = new DBConnection();
 
-
-
-    public Order saveOrder(Order orderToSave) {
-
-        // 1️⃣ Vérifier les stocks (comme avant)
-        for (DishOrder dishOrder : orderToSave.getDishOrders()) {
-            Dish dish = dishOrder.getDish();
-            int dishQuantity = dishOrder.getQuantity();
-
-            for (DishIngredient dishIngredient : dish.getDishIngredients()) {
-                Ingredient ingredient = dishIngredient.getIngredient();
-                double requiredQuantity = dishQuantity * dishIngredient.getQuantity_required();
-
-                StockValue stockValue = ingredient.getStockValueAt(orderToSave.getCreationDatetime());
-
-                if (stockValue == null || stockValue.getQuantity() < requiredQuantity) {
-                    throw new RuntimeException(
-                            "Stock insuffisant pour l'ingrédient : "
-                                    + ingredient.getName()
-                                    + " | requis=" + requiredQuantity
-                                    + " | disponible=" + (stockValue == null ? 0 : stockValue.getQuantity())
-                    );
+        try (Connection connection = dbConnection.getConnection()) {
+            if (orderToSave.getId() == null) {
+                // Vérifier si déjà livré
+                Order existingOrder = findOrderByReference(orderToSave.getReference());
+                if (existingOrder != null && existingOrder.getStatus() == Status.DELIVERED) {
+                    throw new RuntimeException("Order is already DELIVERED");
                 }
-            }
-        }
 
-        // 2️⃣ Préparer SQL pour insérer la commande
-        String insertOrder;
-        if (orderToSave.getReference() == null) {
-            // Générer automatiquement la référence
-            insertOrder = """
-            INSERT INTO "order" (reference_order, creation_datetime)
-            VALUES ('ORD' || LPAD(nextval('order_reference_seq')::text, 5, '0'), ?)
-            RETURNING id, reference_order
-        """;
-        } else {
-            // Utiliser la référence manuelle
-            insertOrder = """
-            INSERT INTO "order" (reference_order, creation_datetime)
-            VALUES (?, ?)
-            RETURNING id, reference_order
-        """;
-        }
-
-        try (Connection conn = new DBConnection().getConnection();
-             PreparedStatement ps = conn.prepareStatement(insertOrder)) {
-
-            conn.setAutoCommit(false);
-
-            if (orderToSave.getReference() == null) {
-                // Automatique → juste la date à paramétrer
-                ps.setTimestamp(1, Timestamp.from(orderToSave.getCreationDatetime()));
-            } else {
-                // Manuel → référence et date
+                // INSERT
+                PreparedStatement ps = connection.prepareStatement("""
+                INSERT INTO "order" (reference, creation_datetime, type, status)
+                VALUES (?,?,?::order_type,?::order_status)
+                RETURNING id
+            """);
                 ps.setString(1, orderToSave.getReference());
                 ps.setTimestamp(2, Timestamp.from(orderToSave.getCreationDatetime()));
+                ps.setString(3, orderToSave.getTypeOrder().name());
+                ps.setString(4, orderToSave.getStatus().name());
+
+                ResultSet rs = ps.executeQuery();
+                if (rs.next()) {
+                    orderToSave.setId(rs.getInt("id"));
+                }
+            } else {
+                // UPDATE
+                PreparedStatement ps = connection.prepareStatement("""
+                UPDATE "order"
+                SET reference = ?,
+                    creation_datetime = ?,
+                    type = ?::order_type,
+                    status = ?::order_status
+                WHERE id = ?
+            """);
+                ps.setString(1, orderToSave.getReference());
+                ps.setTimestamp(2, Timestamp.from(orderToSave.getCreationDatetime()));
+                ps.setString(3, orderToSave.getTypeOrder().name());
+                ps.setString(4, orderToSave.getStatus().name());
+                ps.setInt(5, orderToSave.getId());
+                ps.executeUpdate();
             }
-
-            try (ResultSet rs = ps.executeQuery()) {
-                rs.next();
-                orderToSave.setId(rs.getInt("id"));
-                orderToSave.setReference(rs.getString("reference_order"));
-            }
-
-            conn.commit();
-            return findOrderById(orderToSave.getId());
-
         } catch (SQLException e) {
-            throw new RuntimeException("Erreur lors de l'enregistrement de la commande", e);
+            throw new RuntimeException(e);
         }
+
+        return orderToSave;
     }
-
-
-
-
 
 
 
